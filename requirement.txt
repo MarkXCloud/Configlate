@@ -1,0 +1,10 @@
+torch
+PyYAML
+timm
+tqdm
+matplotlib
+accelerate
+evaluate
+albumentations
+torchinfo
+ptflops

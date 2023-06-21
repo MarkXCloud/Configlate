@@ -1,0 +1,6 @@
+dataset_name: fashionmnist
+root: /data/wangzili
+img_size: (1,224,224)
+num_classes: 10
+batch_size: 24
+num_workers: 4

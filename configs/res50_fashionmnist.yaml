@@ -1,0 +1,21 @@
+__base__: default.yaml
+
+dataset: FashionMNIST.yaml
+
+model: resnet50.yaml
+
+paradigm: imageclassification
+
+optimizer:
+  optimizer_name: adam
+  lr: 0.001
+  weight_decay: 0.00001
+
+scheduler:
+  scheduler_name: warmupmultistep
+  start_factor: 0.01
+  warmup_iter: 3
+  step_milestones: [6, 8]
+  gamma: 0.5
+
+metric: accuracy
