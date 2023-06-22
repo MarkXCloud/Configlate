@@ -1,4 +1,4 @@
-from configlate.registry import register_scheduler
+from configlate import registry
 from typing import List
 import torch
 
@@ -10,6 +10,6 @@ class WarmUpMultiStep(torch.optim.lr_scheduler.ChainedScheduler):
                 torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=step_milestones, gamma=gamma)],
         )
 
-@register_scheduler
+@registry.scheduler
 def warmupmultistep(**kwargs):
     return WarmUpMultiStep(**kwargs)

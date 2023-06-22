@@ -3,10 +3,10 @@ from abc import ABCMeta,abstractmethod
 class _Paradigm(metaclass=ABCMeta):
     @staticmethod
     @abstractmethod
-    def train(**kwargs):
+    def train():
         ...
 
     @staticmethod
     @abstractmethod
-    def inference(**kwargs):
+    def inference():
         ...

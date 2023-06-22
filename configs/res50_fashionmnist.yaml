@@ -2,7 +2,12 @@ __base__: default.yaml
 
 dataset: FashionMNIST.yaml
 
-model: resnet50.yaml
+model:
+  model_name: resnet50
+  pretrained: False
+  in_chans: 1
+  loss:
+    loss_name: crossentropy
 
 paradigm: imageclassification
 

@@ -14,8 +14,8 @@ optimizer:
 scheduler:
   scheduler_name: warmupmultistep
   start_factor: 0.01
-  warmup_iter: 3
-  step_milestones: [6, 8]
+  warmup_iter: 5
+  step_milestones: [16, 20]
   gamma: 0.5
 
 metric: accuracy

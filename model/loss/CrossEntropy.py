@@ -1,6 +1,6 @@
-from configlate.registry import register_loss
+from configlate import registry
 import torch.nn as nn
 
-@register_loss
+@registry.loss
 def crossentropy():
     return nn.CrossEntropyLoss()

@@ -1,4 +1,4 @@
-from .registers import *
+from ._registers import *
 
 def _build(name:str,registry:Registry,**kwargs):
     if not name in registry:

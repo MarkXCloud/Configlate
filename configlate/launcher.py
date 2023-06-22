@@ -75,12 +75,10 @@ def prepare_everything(args):
     scheduler_params = module_dict['scheduler']
     metric_params = module_dict['metric']
     saver_params = module_dict['saver']
-    log_name = module_dict['info'].pop('log_name')
+    log_name = module_dict.pop('log_name')
 
     # basic info for the wandb log
-    tracker_config = module_dict['info']
-
-    accelerator.init_trackers(log_name, config=tracker_config)
+    accelerator.init_trackers(log_name, config=module_dict)
 
     torch.cuda.empty_cache()
 
@@ -91,7 +89,7 @@ def prepare_everything(args):
     train_loader, test_loader = build_dataeset(**dataset_params)
     optimizer = build_optimizer(params=model.parameters(),**optimizer_params)
     scheduler = build_scheduler(optimizer=optimizer,**scheduler_params)
-    epoch = module_dict['info']['epoch']
+    epoch = module_dict['epoch']
     metric = evaluate.load(metric_params)
     saver = build_saver(config_file=args.config,**saver_params)
 

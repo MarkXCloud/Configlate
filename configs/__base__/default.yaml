@@ -1,9 +1,9 @@
-wandb_log_name: example_project
+log_name: example_project
 
-epoch: 1
+epoch: 24
 
 saver:
   save_interval: 1
   higher_is_better: True
   monitor: accuracy
-  root: /data/wangzili/runs
+  root: /data/wangzili/configlate/runs

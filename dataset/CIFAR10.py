@@ -1,4 +1,4 @@
-from configlate.registry import register_dataset
+from configlate import registry
 import torchvision
 import torchvision.transforms as T
 import torch.nn.functional as F
@@ -32,7 +32,7 @@ class CIFAR10(torchvision.datasets.CIFAR10):
         return image, target
 
 
-@register_dataset
+@registry.dataset
 def cifar10(root: str, img_size: tuple, num_classes: int, batch_size: int, **kwargs) -> tuple:
     train_set = CIFAR10(root=root,
                         train=True,

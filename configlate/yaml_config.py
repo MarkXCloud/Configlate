@@ -15,30 +15,19 @@ def load_yaml_cfg(script_path) -> OrderedDict:
     return d
 
 
-def fuse_yaml_cfg(raw_yaml_dict: OrderedDict):
+def fuse_yaml_cfg(raw_yaml_dict: OrderedDict)->OrderedDict:
     assert '__base__' in raw_yaml_dict, f"__base__ key missing in current yaml file"
     base_cfg = raw_yaml_dict.pop('__base__')
+    base_cfg.update(raw_yaml_dict)
 
-    if raw_yaml_dict['dataset'].get('img_size', False):
-        raw_yaml_dict['dataset']['img_size'] = eval(raw_yaml_dict['dataset']['img_size'])[-2:]
-    assert isinstance(raw_yaml_dict['dataset']['img_size'], tuple), "img_size must bu a tuple!"
+    if base_cfg['dataset'].get('img_size', False):
+        base_cfg['dataset']['img_size'] = eval(base_cfg['dataset']['img_size'])[-2:]
+        assert isinstance(base_cfg['dataset']['img_size'], tuple), "img_size must bu a tuple!"
 
-    raw_yaml_dict['model'].update({'num_classes': raw_yaml_dict['dataset']['num_classes']})
-    raw_yaml_dict.update({'saver': base_cfg['saver']})
+    base_cfg['model'].update({'num_classes': base_cfg['dataset']['num_classes']})
 
-    info = dict(
-        log_name=base_cfg['wandb_log_name'],
-        epoch=base_cfg['epoch'],
-        model=raw_yaml_dict['model'],
-        optimizer=raw_yaml_dict['optimizer'],
-        scheduler=raw_yaml_dict['scheduler'],
-        dataset=raw_yaml_dict['dataset'],
-        save_dir=base_cfg['saver'],
-    )
 
-    raw_yaml_dict.update({'info': info})
-
-    return raw_yaml_dict
+    return base_cfg
 
 
 def load_yaml(file_name: str):
