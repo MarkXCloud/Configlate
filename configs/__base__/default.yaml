@@ -1,9 +1,0 @@
-log_name: example_project
-
-epoch: 24
-
-saver:
-  save_interval: 1
-  higher_is_better: True
-  monitor: accuracy
-  root: /data/wangzili/configlate/runs

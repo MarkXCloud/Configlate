@@ -1,2 +1,2 @@
 from ._build import *
-from .CrossEntropy import *
+from .ClsLoss import *

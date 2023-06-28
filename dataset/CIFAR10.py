@@ -33,7 +33,7 @@ class CIFAR10(torchvision.datasets.CIFAR10):
 
 
 @registry.dataset
-def cifar10(root: str, img_size: tuple, num_classes: int, batch_size: int, **kwargs) -> tuple:
+def cifar10(root: str, img_size) -> tuple:
     train_set = CIFAR10(root=root,
                         train=True,
                         transform=A.Compose([
@@ -43,7 +43,7 @@ def cifar10(root: str, img_size: tuple, num_classes: int, batch_size: int, **kwa
                             ToTensorV2()]),
                         target_transform=T.Compose([
                             lambda x: torch.LongTensor([x]),
-                            lambda x: F.one_hot(x, num_classes).squeeze(0).to(torch.float32)]), )
+                            lambda x: F.one_hot(x, 10).squeeze(0).to(torch.float32)]), )
     test_set = CIFAR10(root=root,
                        train=False,
                        transform=A.Compose([
@@ -52,5 +52,4 @@ def cifar10(root: str, img_size: tuple, num_classes: int, batch_size: int, **kwa
                                        std=(0.229, 0.224, 0.225)),
                            ToTensorV2()]),
                        target_transform=lambda x: torch.tensor(x))
-    return torch.utils.data.DataLoader(train_set, batch_size=batch_size, shuffle=True, **kwargs), \
-        torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False, **kwargs)
+    return train_set,test_set

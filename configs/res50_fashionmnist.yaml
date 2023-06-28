@@ -1,6 +1,20 @@
-__base__: default.yaml
+log_name: example_project
 
-dataset: FashionMNIST.yaml
+epoch: 24
+
+saver:
+  save_interval: 1
+  higher_is_better: True
+  monitor: accuracy
+  root: /data/wangzili/configlate/runs
+
+dataset:
+  dataset_name: fashionmnist
+  root: /data/wangzili
+  img_size: [ 224,224 ]
+  num_classes: 10
+  batch_size: 24
+  num_workers: 4
 
 model:
   model_name: resnet50
@@ -9,7 +23,6 @@ model:
   loss:
     loss_name: crossentropy
 
-paradigm: imageclassification
 
 optimizer:
   optimizer_name: adam
@@ -20,7 +33,7 @@ scheduler:
   scheduler_name: warmupmultistep
   start_factor: 0.01
   warmup_iter: 3
-  step_milestones: [6, 8]
+  step_milestones: [ 6, 8 ]
   gamma: 0.5
 
 metric: accuracy

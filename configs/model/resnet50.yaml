@@ -1,4 +1,0 @@
-model_name: resnet50
-pretrained: False
-loss:
-  loss_name: crossentropy
