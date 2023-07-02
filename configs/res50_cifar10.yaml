@@ -1,39 +1,38 @@
-log_name: example_project
-
-epoch: 1
+wandb_log_name: example_project
 
 num_classes: 10
 dataset:
   dataset_name: cifar10
   root: /data/wangzili
   img_size: [ 224,224 ]
-batch_size: 8
-num_workers: 4
 
 model:
   model_name: resnet50
-  pretrained: False
   num_classes: ${num_classes}
 loss:
   loss_name: crossentropy
 
 optimizer:
-  optimizer_name: adam
+  optimizer_name: adamw
   lr: 0.001
   weight_decay: 0.00001
 
-scheduler:
-  scheduler_name: warmupmultistep
-  start_factor: 0.01
-  warmup_iter: 5
-  step_milestones: [ 16, 20 ]
+iter_scheduler:
+  scheduler_name: linearlr
+  start_factor: 0.001
+  total_iters: 1600
+
+epoch_scheduler:
+  scheduler_name: multisteplr
+  milestones: [ 16,20 ]
   gamma: 0.5
 
 metric:
   metric_name: accuracy
+  topk: [ 1,5 ]
 
 saver:
-  save_interval: 1
+  save_interval: 10
   higher_is_better: True
-  monitor: accuracy
+  monitor: accuracy@top1
   save_dir: /data/wangzili/runs

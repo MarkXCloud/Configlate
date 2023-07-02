@@ -2,27 +2,19 @@ log_name: example_project
 
 epoch: 24
 
-saver:
-  save_interval: 1
-  higher_is_better: True
-  monitor: accuracy
-  root: /data/wangzili/configlate/runs
-
+num_classes: 10
 dataset:
   dataset_name: fashionmnist
   root: /data/wangzili
   img_size: [ 224,224 ]
-  num_classes: 10
-  batch_size: 24
-  num_workers: 4
+batch_size: 8
+num_workers: 4
 
 model:
   model_name: resnet50
-  pretrained: False
-  in_chans: 1
-  loss:
-    loss_name: crossentropy
-
+  num_classes: ${num_classes}
+loss:
+  loss_name: crossentropy
 
 optimizer:
   optimizer_name: adam
@@ -32,8 +24,15 @@ optimizer:
 scheduler:
   scheduler_name: warmupmultistep
   start_factor: 0.01
-  warmup_iter: 3
-  step_milestones: [ 6, 8 ]
+  warmup_iter: 5
+  step_milestones: [ 16, 20 ]
   gamma: 0.5
 
-metric: accuracy
+metric:
+  metric_name: accuracy
+
+saver:
+  save_interval: 1
+  higher_is_better: True
+  monitor: accuracy
+  save_dir: /data/wangzili/runs

@@ -9,15 +9,15 @@ import subprocess
 import pickle
 from packaging import version
 from typing import Optional, List
-import wandb
 import torch
 import torch.distributed as dist
 from torch import Tensor
 from functools import wraps
-import os.path as osp
+from pathlib import Path
 
 # needed due to empty tensor bug in pytorch and torchvision 0.5
 import torchvision
+
 if version.parse(torchvision.__version__) < version.parse('0.7'):
     from torchvision.ops import _new_empty_tensor
     from torchvision.ops.misc import _output_size
@@ -93,12 +93,12 @@ def reduce_dict(input_dict, average=True):
     return reduced_dict
 
 
-
 def get_sha():
     cwd = os.path.dirname(os.path.abspath(__file__))
 
     def _run(command):
         return subprocess.check_output(command, cwd=cwd).decode('ascii').strip()
+
     sha = 'N/A'
     diff = "clean"
     branch = 'N/A'
@@ -246,34 +246,41 @@ def get_rank():
 def is_main_process():
     return get_rank() == 0
 
+
 def doing_nothing():
     return
 
+
 def on_main_process(func):
     @wraps(func)
-    def main_process_wrapper(*args,**kwargs):
+    def main_process_wrapper(*args, **kwargs):
         if is_main_process():
-            return func(*args,**kwargs)
+            return func(*args, **kwargs)
         else:
             return doing_nothing()
+
     return main_process_wrapper
+
 
 def init_distributed_mode(args):
     if 'RANK' in os.environ and 'WORLD_SIZE' in os.environ:
         args.rank = int(os.environ["RANK"])
         args.world_size = int(os.environ['WORLD_SIZE'])
-        args.gpu = int(os.environ['LOCAL_RANK'])
+        args.device = int(os.environ['LOCAL_RANK'])
     elif 'SLURM_PROCID' in os.environ:
         args.rank = int(os.environ['SLURM_PROCID'])
-        args.gpu = args.rank % torch.cuda.device_count()
+        args.device = args.rank % torch.cuda.device_count()
     else:
         print('Not using distributed mode')
         args.distributed = False
+        args.rank = 0
+        args.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        show_device()
         return
 
     args.distributed = True
 
-    torch.cuda.set_device(args.gpu)
+    torch.cuda.set_device(args.device)
     args.dist_backend = 'nccl'
     args.dist_url = 'env://'
     print('| distributed init (rank {}): {}'.format(
@@ -282,6 +289,7 @@ def init_distributed_mode(args):
                                          world_size=args.world_size, rank=args.rank)
     torch.distributed.barrier()
     setup_for_distributed(args.rank == 0)
+    show_device()
 
 
 @torch.no_grad()
@@ -322,35 +330,28 @@ def interpolate(input, size=None, scale_factor=None, mode="nearest", align_corne
     else:
         return torchvision.ops.misc.interpolate(input, size, scale_factor, mode, align_corners)
 
-class WandBLogger:
-    def __init__(self):
-        pass
-    @staticmethod
-    @on_main_process
-    def init(*args,**kwargs):
-        wandb.init(*args,**kwargs)
 
-    @staticmethod
-    @on_main_process
-    def log(*args,**kwargs):
-        wandb.log(*args,**kwargs)
+def show_device():
+    s = f'Using torch {torch.__version__}\n'
 
-    @staticmethod
-    @on_main_process
-    def save(*args,**kwargs):
-        wandb.save(*args,**kwargs)
+    cuda = torch.cuda.is_available()
+    if cuda:
+        n = torch.cuda.device_count()
+        for i, d in enumerate(range(n)):
+            p = torch.cuda.get_device_properties(i)
+            s += f"CUDA:{d} ({p.name}, {p.total_memory / 1024 ** 2}MB)\n"  # bytes to MB
+    else:
+        s += 'CPU'
 
-    @staticmethod
-    @on_main_process
-    def finish(*args,**kwargs):
-        wandb.finish(*args,**kwargs)
+    print(s)
+
 
 class Saver:
     """
     Saver can save the latest model and the best model.
     """
 
-    def __init__(self, save_interval: int, higher_is_better: bool, monitor: str,save_dir:str=''):
+    def __init__(self, save_interval: int, higher_is_better: bool, monitor: str, save_dir: Path = Path('')):
         """
         :param save_interval: when we want to save the latest model, it saves it per $save_step$ epochs.
         :param higher_is_better: when we want to save the best model, we should point out what is 'best', higher_is_better means\
@@ -369,7 +370,7 @@ class Saver:
 
     def save_latest_model(self, model):
         if self._cnt == self._save_interval:
-            Saver.save_on_master(Saver.unwrap(model), f=osp.join(self.save_dir, "latest.pt"))
+            Saver.save_on_master(Saver.unwrap(model), f=Path(self.save_dir) / "latest.pt")
             self._cnt = 1
             print(f"Save latest model under {self.save_dir}")
         else:
@@ -379,7 +380,7 @@ class Saver:
         metric = metric[self.monitor]
         condition = metric > self._metric if self.hib else metric < self._metric
         if condition:
-            Saver.save_on_master(Saver.unwrap(model), f=osp.join(self.save_dir, "best.pt"))
+            Saver.save_on_master(Saver.unwrap(model), f=Path(self.save_dir)  / "best.pt")
             self._metric = metric
             print(f"Save new best model under {self.save_dir}")
 
@@ -391,6 +392,6 @@ class Saver:
     @staticmethod
     def unwrap(model):
         if dist.is_initialized():
-            return model.module
+            return model.module.state_dict()
         else:
-            return model
+            return model.state_dict()

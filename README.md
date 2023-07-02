@@ -6,12 +6,12 @@ detection and so on.
 Based ont Template, I tried to put everything together with `.yaml` configs and the `build` function
 **Configlate** can work with various functions necessary in a training paradigm:
 
-1. Custom model definition, supported by [timm](https://github.com/huggingface/pytorch-image-models).
+1. Custom model definition.
 2. Custom dataset definition,built by `build_dataset`, with [albumentations](https://albumentations.ai/docs/) for data augmentation.
-3. Config file in `.yaml`,load everything from the corresponding build functin.
-4. Distributed training, supported by [accelerate](https://huggingface.co/docs/accelerate/index). With some useful features of accelerate we can easily launch distributed training with small changes of code, while avoid some tedious changes including `sampler.set_epoch()` (used to set random seed every epoch in ddp), `model_saved=ddp_model.module` (because primitive model is wrapped for ddp).
+3. Config file in `.yaml`,load everything from the corresponding build function.
+4. Distributed training.
 5. [WandB](https://wandb.ai/site) for logging the info of everything at first, and tracing the loss or other metrics curve.
-6. Evaluation supported by [evaluate](https://huggingface.co/docs/evaluate/index). Initiate the evaluator in config, call it in test loop to record predictions, and finally compute all the metrics. If you want to use a custom metric you should rewrite `add_batch()` method and `compute()`method.
+6. Evaluation.Initiate the evaluator in config, call it in test loop to record predictions, and finally compute all the metrics. If you want to use a custom metric you should rewrite `add_batch()` method and `compute()`method.
 7. Saver to save the latest model with custom interval and the best model with specific metric.
 8. Model #params and #MACS supported by [torchinfo](https://github.com/TylerYep/torchinfo) and [ptflops](https://github.com/LukasHedegaard/ptflops).
 
@@ -20,10 +20,7 @@ Based ont Template, I tried to put everything together with `.yaml` configs and 
 - torch
 - torchvision
 - PyYAML
-- timm
 - tqdm
-- accelerate
-- evaluate
 - albumentations
 - torchinfo
 - ptflops
@@ -33,7 +30,7 @@ Based ont Template, I tried to put everything together with `.yaml` configs and 
 To train a model directly:
 
 ```sh
-accelerate launch train.py configs/res50_cifar10.yaml
+python train.py configs/res50_cifar10.yaml
 ```
 
 Then you can find your run under `runs/res50_cifar10/$local_time$/` with your config file and `.pt` weights.
@@ -41,10 +38,8 @@ Then you can find your run under `runs/res50_cifar10/$local_time$/` with your co
 To use distributed training:
 
 ```sh
-accelerate launch --multi_gpu train.py configs/res50_cifar10.yaml
+torchrun --nnode 1 --nproc_per_node 8 train.py configs/res50_cifar10.yaml
 ```
-
-Other shell configurations please refer [accelerate](https://huggingface.co/docs/accelerate/index).
 
 # Calculate parameters and MACS
 

@@ -1,10 +1,10 @@
 torch
 PyYAML
-timm
 tqdm
-matplotlib
-accelerate
-evaluate
 albumentations
+tensorboardx
+wandb
+prettytable
+omegaconf
 torchinfo
 ptflops
